@@ -317,6 +317,61 @@ namespace aSanalPos
                 this.hataMesaji = this.sistemHatasi;
             }
         }
+        public void FinansBank(PosForm pf)
+        {
+            try
+            {
+                ePayment.cc5payment mycc5pay = new ePayment.cc5payment();
+                mycc5pay.host = "https://finanstest.fbwebpos.com/servlet/cc5ApiServer";
+                mycc5pay.name = "xxx";
+                mycc5pay.password = "xxx";
+                mycc5pay.clientid = "xxx";
+                mycc5pay.orderresult = 0;
+                mycc5pay.oid = Tool.RandomNumber();
+                mycc5pay.currency = "949";
+                mycc5pay.chargetype = "Auth";
+                //gelenler
+                mycc5pay.cardnumber = pf.kartNumarasi.ToString();
+                mycc5pay.expmonth = string.Format("{0:00}", pf.ay);
+                mycc5pay.expyear = pf.yil.ToString().Substring(2, 2);
+                mycc5pay.cv2 = string.Format("{0:000}", pf.guvenlikKodu);
+                mycc5pay.subtotal = pf.tutar.ToString();
+
+                if (pf.taksit == -1)
+                {
+                    mycc5pay.taksit = "1";
+                }
+                else
+                {
+                    mycc5pay.taksit = pf.taksit.ToString();
+                }
+
+                //yedek bilgiler
+                mycc5pay.bname = pf.kartSahibi;
+                mycc5pay.phone = Tool.GetIp();
+                string x = mycc5pay.processorder();
+                if (x == "1" & mycc5pay.appr == "Approved")
+                {
+                    //bankadan geri dönen
+                    this.sonuc = true;
+                    this.groupId = mycc5pay.groupid;
+                    this.referansNo = mycc5pay.refno;
+                    this.transId = mycc5pay.transid;
+                    this.code = mycc5pay.code;
+                }
+                else
+                {
+                    this.sonuc = false;
+                    this.hataKodu = mycc5pay.err;
+                    this.hataMesaji = mycc5pay.errmsg;
+                }
+            }
+            catch (System.Exception)
+            {
+                this.sonuc = false;
+                this.hataMesaji = this.sistemHatasi;
+            }
+        }
         #endregion
     }
 }
