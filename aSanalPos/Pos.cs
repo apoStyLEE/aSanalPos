@@ -372,6 +372,59 @@ namespace aSanalPos
                 this.hataMesaji = this.sistemHatasi;
             }
         }
+        public void DenizBank(PosForm pf)
+        {
+            try
+            {
+                ePayment.cc5payment mycc5pay = new ePayment.cc5payment();
+
+                mycc5pay.host = "https://sanalpos.denizbank.com.tr/servlet/cc5ApiServer";
+                mycc5pay.name = "xxxx";
+                mycc5pay.password = "xxxx";
+                mycc5pay.clientid = "xxxx";
+                mycc5pay.orderresult = 0;
+
+                mycc5pay.oid = Tool.RandomNumber();
+
+                mycc5pay.cardnumber = pf.kartNumarasi.ToString();
+                mycc5pay.expmonth = pf.ay.ToString();
+                mycc5pay.expyear = pf.yil.ToString().Substring(2, 2);
+                mycc5pay.cv2 = pf.guvenlikKodu.ToString();
+
+                mycc5pay.subtotal = string.Format("{0:0.00}", pf.tutar);
+                mycc5pay.currency = "949";
+                mycc5pay.chargetype = "Auth";
+
+                mycc5pay.taksit = pf.taksit.ToString();
+
+                //fatura bilgileri
+                mycc5pay.bname = pf.kartSahibi;
+                mycc5pay.bcity = Tool.GetIp();
+
+                string x = mycc5pay.processorder();
+
+                if (x == "1" & mycc5pay.appr == "Approved")
+                {
+                    this.sonuc = true;
+                    this.groupId = mycc5pay.groupid;
+                    this.code = mycc5pay.code;
+                    this.transId = mycc5pay.transid;
+                    this.referansNo = mycc5pay.refno;
+                }
+                else
+                {
+                    this.hataMesaji = "";
+                    this.hataKodu = mycc5pay.errmsg;
+                    this.sonuc = false;
+                }
+            }
+            catch (System.Exception)
+            {
+                this.hataMesaji = "Bankayla bağlantı kurulamadı !<br />Lütfen daha sonra tekrar deneyin.";
+                this.sonuc = false;
+            }
+
+        }
         #endregion
     }
 }
